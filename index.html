@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You | Eternal Bloom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fff0f3;
+            --accent: #f48fb1;
+            --text: #4a4a4a;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            overflow-y: hidden;
+            overflow-x: auto;
+            cursor: none;
+        }
+
+        body::after {
+            content: "";
+            position: fixed; inset: 0;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 10000;
+        }
+
+        .cinema-track {
+            display: flex;
+            align-items: center;
+            height: 100vh;
+            width: fit-content;
+            padding: 0 10vw;
+            gap: 15vw;
+            background: linear-gradient(90deg, #fff0f3 0%, #ffe4ec 50%, #fff0f3 100%);
+        }
+
+        .photo-frame {
+            position: relative;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: revealIn 1.5s ease forwards;
+        }
+
+        @keyframes revealIn {
+            to { opacity: 1; transform: translateY(0) rotate(var(--rot)); }
+        }
+
+        .photo-frame:nth-child(1) { animation-delay: 0.2s; --rot: -3deg; }
+        .photo-frame:nth-child(2) { animation-delay: 0.5s; --rot: 3deg; }
+        .photo-frame:nth-child(3) { animation-delay: 0.8s; --rot: -2deg; }
+        .photo-frame:nth-child(4) { animation-delay: 1.0s; --rot: 2deg; }
+        .photo-frame:nth-child(5) { animation-delay: 1.2s; --rot: -3deg; }
+        .photo-frame:nth-child(6) { animation-delay: 1.4s; --rot: 3deg; }
+        .photo-frame:nth-child(7) { animation-delay: 1.6s; --rot: -1deg; }
+
+        .flower-border {
+            padding: 30px;
+            background: white;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.05);
+            position: relative;
+            transition: all 0.5s ease;
+        }
+
+        .photo-frame:hover .flower-border {
+            box-shadow: 0 0 50px rgba(244, 143, 177, 0.4);
+            transform: scale(1.05);
+        }
+
+        .flower-border::before {
+            content: "";
+            position: absolute; inset: -50px;
+            background: url('https://www.transparentpng.com/download/floral/pink-flowers-frame-png-free-download-2.png') no-repeat center;
+            background-size: contain;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .photo-frame img {
+            width: 300px;
+            display: block;
+            filter: grayscale(100%) sepia(20%);
+            transition: 1s ease;
+        }
+
+        .photo-frame:hover img {
+            filter: grayscale(0%) sepia(0%);
+        }
+        .music-player {
+            position: fixed;
+            bottom: 30px; left: 30px;
+            z-index: 5000;
+            display: flex; align-items: center; gap: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 10px 20px;
+            border-radius: 60px;
+            backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 15px 35px rgba(244, 143, 177, 0.15);
+    transition: transform 0.3s ease;
+}
+
+        .disc-wrapper { position: relative; width: 50px; height: 50px; }
+        .disc {
+            width: 100%; height: 100%;
+            background: radial-gradient(circle, #333 30%, #111 100%);
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            animation: spin 4s linear infinite;
+            animation-play-state: paused;
+        }
+
+        .playing .disc { animation-play-state: running; }
+        .tonearm {
+            position: absolute; top: -5px; right: -10px;
+            width: 25px; height: 4px; background: #888;
+            transform-origin: left center; transform: rotate(45deg);
+            transition: 0.5s ease; z-index: 2;
+        }
+        .playing .tonearm { transform: rotate(15deg); }
+
+        .song-status { font-size: 10px; font-weight: bold; color: var(--accent); letter-spacing: 2px; }
+        
+        .secret-envelope { flex-shrink: 0; width: 200px; text-align: center; margin-left: 10vw; cursor: pointer; }
+        .envelope-icon { font-size: 50px; filter: drop-shadow(0 5px 15px rgba(244,143,177,0.4)); transition: 0.3s; }
+        .envelope-icon:hover { transform: scale(1.2); }
+
+        .cursor-follower {
+            position: fixed; width: 8px; height: 8px;
+            background: var(--accent); border-radius: 50%;
+            pointer-events: none; z-index: 20000;
+        }
+
+        .petal-particle {
+            position: fixed; pointer-events: none;
+            font-size: 14px; z-index: 19999;
+        }
+
+        .modal {
+            position: fixed; inset: 0;
+            background: rgba(255,255,255,0.96);
+            z-index: 30000; display: none;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(15px);
+        }
+
+        .modal.active { display: flex; animation: fadeIn 0.5s; }
+        .modal-content {
+            max-width: 800px; text-align: center; padding: 40px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .modal-img {
+            max-height: 50vh; border: 15px solid white;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.1); margin-bottom: 30px;
+        }
+
+        .compliment { font-family: 'Playfair Display', serif; font-size: 24px; font-style: italic; margin-bottom: 20px; }
+        .lyrics { font-family: 'Playfair Display', serif; color: var(--accent); line-height: 1.6; white-space: pre-line; }
+
+        .close-btn { position: absolute; top: 40px; right: 40px; font-size: 40px; cursor: pointer; }
+
+        #heart-btn { font-size: 35px; margin-top: 20px; transition: transform 0.3s; }
+        #heart-btn:hover { transform: scale(1.2); }
+        #thanks-msg { font-size: 14px; color: var(--accent); margin-top: 10px; }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="cursor-follower" id="cursor"></div>
+
+    <div class="music-player" id="playerContainer">
+      <div class="disc-wrapper">
+          <div class="tonearm"></div>
+          <div class="disc" id="disc"></div>
+      </div>
+      <div class="song-info">
+          <span class="song-status" id="statusText">Music Off</span>
+      </div>
+      <audio id="bgMusic" loop>
+          <source src="moldanazar-alystama.mp3" type="audio/mpeg">
+      </audio>
+    </div>
+
+    <div class="cinema-track">
+        <div class="photo-frame" data-idx="0"><div class="flower-border"><img src="photo_2026-03-05 14.13.52.jpeg"></div></div>
+        <div class="photo-frame" data-idx="1"><div class="flower-border"><img src="photo_2026-03-05 14.13.55.jpeg"></div></div>
+        <div class="photo-frame" data-idx="2"><div class="flower-border"><img src="photo_2026-03-05 14.13.56.jpeg"></div></div>
+        <div class="photo-frame" data-idx="3"><div class="flower-border"><img src="photo_2026-03-05 14.13.57.jpeg"></div></div>
+        <div class="photo-frame" data-idx="4"><div class="flower-border"><img src="photo_2026-03-05 14.13.58.jpeg"></div></div>
+        <div class="photo-frame" data-idx="5"><div class="flower-border"><img src="photo_2026-03-05 14.13.59.jpeg"></div></div>
+        <div class="photo-frame" data-idx="6"><div class="flower-border"><img src="photo_2026-03-05 14.16.22.jpeg"></div></div>
+
+        <div class="secret-envelope" id="envelope">
+            <div class="envelope-icon">✉️</div>
+            <p style="font-size: 10px; opacity: 0.5;">SECRET LETTER</p>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <span class="close-btn" id="close">&times;</span>
+        <div class="modal-content">
+            <img id="modalImg" class="modal-img">
+            <div class="compliment" id="caption"></div>
+            <div class="lyrics" id="lyrics"></div>
+            
+            <div id="heart-btn" style="display:none;">🤍</div>
+            <p id="thanks-msg" style="display:none;">Твоя реакция согрела мне сердце. Спасибо.</p>
+        </div>
+    </div>
+
+    <script>
+        const cursor = document.getElementById('cursor');
+        const modal = document.getElementById('modal');
+        const audio = document.getElementById('bgMusic');
+        
+       
+
+        // 2. Курсор и лепестки
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            if (Math.random() > 0.9) createPetal(e.clientX, e.clientY);
+        });
+
+        function createPetal(x, y) {
+            const p = document.createElement('div');
+            p.className = 'petal-particle';
+            p.innerHTML = '🌸';
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+            document.body.appendChild(p);
+            
+            const destX = (Math.random() - 0.5) * 100;
+            const destY = 50 + Math.random() * 100;
+            
+            p.animate([
+                { transform: 'translate(0, 0) rotate(0)', opacity: 1 },
+                { transform: `translate(${destX}px, ${destY}px) rotate(180deg)`, opacity: 0 }
+            ], { duration: 1500, easing: 'ease-out' }).onfinish = () => p.remove();
+        }
+
+        // 3. Скролл
+        window.addEventListener('wheel', (e) => {
+            document.documentElement.scrollLeft += e.deltaY;
+        });
+
+        // 4. Плеер
+        const disc = document.getElementById('disc');
+        const statusText = document.getElementById('statusText');
+        audio.volume = 0.2;
+
+        disc.onclick = () => {
+            if (audio.paused) {
+                audio.play();
+                document.getElementById('playerContainer').classList.add('playing');
+                statusText.textContent = "Music On";
+            } else {
+                audio.pause();
+                document.getElementById('playerContainer').classList.remove('playing');
+                statusText.textContent = "Music Off";
+            }
+        };
+
+        // 5. Контент
+        const compliments = [
+            "В тебе есть какая-то редкая искренность. С тобой не хочется играть роли — рядом с тобой хочется быть настоящим.",
+            "Ты напоминаешь кадр из очень красивого и доброго фильма, который хочется пересматривать в дождливый день",
+            "И если сегодня ночью звёзды столкнутся, я буду крепко тебя обнимать и держать в объятиях.",
+            "Я часто думаю о том, как тебе удается быть одновременно такой сильной и такой хрупкой. Это и есть настоящая магия.",
+            "Твой голос — мой любимый саундтрек. Я бы слушал его на повторе вечно, забыв про все заботы мира.",
+            "Ты — искусство. Не то, что висит в пыльных музеях, а то, что живет, дышит и заставляет сердце биться чаще.",
+            "Просто знай: ты — причина, по которой этот сайт вообще существует. Твоя красота вдохновляет на создание прекрасного."
+        ];
+
+       // 6. Клики по фото
+       const frames = document.querySelectorAll('.photo-frame');
+        frames.forEach(frame => {
+            frame.onclick = () => {
+                const idx = frame.dataset.idx;
+                document.getElementById('modalImg').src = frame.querySelector('img').src;
+                document.getElementById('modalImg').style.display = 'block';
+                
+                // Устанавливаем текст сразу без анимации
+                document.getElementById('caption').innerText = compliments[idx];
+                document.getElementById('lyrics').innerText = ""; 
+                
+                document.getElementById('heart-btn').style.display = 'none';
+                document.getElementById('thanks-msg').style.display = 'none';
+                
+                modal.classList.add('active');
+            }
+        });
+       // 7. Конверт
+       document.getElementById('envelope').onclick = () => {
+            document.getElementById('modalImg').style.display = 'none';
+            
+            // Устанавливаем тексты сразу
+            document.getElementById('caption').innerText = "Поздравление";
+            document.getElementById('lyrics').innerText = "С 8 Марта! 🌸 Хочу пожелать тебе много тепла, искренних улыбок и счастливых моментов. Пусть в твоей жизни будет больше света, спокойствия и людей, рядом с которыми ты чувствуешь себя по-настоящему счастливой. Оставайся такой же красивой, нежной и особенной. Пусть каждый день приносит тебе радость, вдохновение и ощущение, что ты очень ценна и важна. Пусть всё хорошее, что есть в этом мире, обязательно находит дорогу к тебе. ✨";
+            
+            modal.classList.add('active');
+            
+            // Кнопку сердца можно показать сразу или через секунду
+            document.getElementById('heart-btn').style.display = 'block';
+            document.getElementById('heart-btn').innerHTML = '🤍';
+            document.getElementById('thanks-msg').style.display = 'none';
+        };
+        // 8. Закрытие и реакции
+        document.getElementById('close').onclick = () => {
+            modal.classList.remove('active');
+        };
+
+        document.getElementById('heart-btn').onclick = function() {
+            this.innerHTML = '❤️';
+            document.getElementById('thanks-msg').style.display = 'block';
+        };
+
+        // Фоновые лепестки
+        setInterval(() => {
+            createPetal(Math.random() * window.innerWidth, -20);
+        }, 2000);
+
+    </script>
+</body>
+</html>
